@@ -1,0 +1,20 @@
+#!/bin/bash
+user=$USER
+ip=${SSH_CLIENT%% *}
+time=$(date +%F-%k:%M)
+hostname=$(hostname)
+echo "content=$time,$user,$ip,$hostname" > log
+
+# 直接通过命令来进行发邮件
+#
+python /etc/ssh/testEmail.py "$time" "$user" "$ip" "$hostname" &> /dev/null &
+# 通过单独的脚本进行发邮件
+#
+#/bin/bash /etc/ssh/start_mail.sh &
+
+# 清空已使用的变量，防止占用
+#
+unset user
+unset ip
+unset time
+unset hostname
