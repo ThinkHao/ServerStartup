@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# If there is an error, exit now!
 set -e
 
 # Check if user is root
@@ -15,7 +17,7 @@ remove_packages() {
 	if [ $? -eq 0 ];then
 		echo "Removed ${line}"
 	else
-		echo "Fail to remove ${line}"
+		echo "Failed to remove ${line}"
 	fi
 	done < include/software_to_remove.sh
 	clear
@@ -46,40 +48,40 @@ start_firewalld() {
 	systemctl start firewalld &> /dev/null
 	if [ $? -eq 0 ];then
 		systemctl enable firewalld &> /dev/null
-		echo "firewalld 启动成功！"
+		echo "Success to start firewalld!"
 	else
-		echo "firewalld 的安装有问题。"
+		echo "Fail to start firewalld."
 		exit 1
 	fi
 }
 
-# Usage: add-port 22 tcp
+# Usage: add-port tcp 22
 # $1: port_number
 # $2: protocol
 add_port() {
-	echo "正在添加端口 $2/$1"
-	firewall-cmd --zone=public --add-port=$1/$2 --permanent &> /dev/null
+	echo "Adding port $1/$2..."
+	firewall-cmd --zone=public --add-port=$2/$1 --permanent &> /dev/null
 	firewall-cmd --reload &> /dev/null
 	if [ $? -eq 0 ];then
-		echo "防火墙重启成功，端口$2/$1生效成功！"
+		echo "Success to restart firewalld. Port $1/$2 has been opened."
 	fi
 }
 
 install_fail2ban() {
-	echo "正在添加epel-release库"
+	echo "Adding the epel-release repo..."
 	yum -y install epel-release &> /dev/null
 	if [ $? -eq 0 ];then
-		echo "epel-release库添加成功！"
+		echo "Added epel-release！"
 	fi
-	echo "开始安装fail2ban"
+	echo "Start to install fail2ban..."
 	yum -y install fail2ban &> /dev/null
 	if [ $? -eq 0 ];then
-		echo "fail2ban安装成功！"
+		echo "Success to install fail2ban!"
 	fi
 }
 
 config_fial2ban() {
-	echo "正在配置fail2ban"
+	echo "Make some configurations for fail2ban."
 	echo "#默认配置
 [DEFAULT]
 ignoreip = 127.0.0.1 127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
@@ -88,11 +90,11 @@ findtime = 600
 maxretry = 5
 banaction = firewallcmd-ipset
 action = %(action_mwl)s" > /etc/fail2ban/jail.local
-	echo "Done"
+	echo "Done!"
 }
 
 add_sshd() {
-	echo "正在添加sshd到fail2ban"
+	echo "Adding sshd into fail2ban..."
 	echo "
 [sshd]
 enabled = true
@@ -103,27 +105,39 @@ logpath = /var/log/secure" > /etc/fail2ban/jail.d/sshd.local
 }
 
 start_fail2ban() {
-	echo "正在启动fail2ban"
+	echo "Starting fail2ban..."
 	systemctl start fail2ban &> /dev/null
 	if [ $? -eq 0 ];then
-		echo "服务启动成功！当前运行状态如下："
+		echo "Success to start fail2ban. The running state is:"
 	fi
 	fail2ban-client status sshd
 }
 
 # Begin to install fail2ban
 action=$1
-[ -z $1 ] && action=install
+[ -z $1 ] && action=all
 case "${action}" in
-    install)
+    fail2ban)
 		start_firewalld
-		add_port "22" "tcp"
+		add_port "tcp" "22"
 		install_fail2ban
 		config_fial2ban
 		add_sshd
 		start_fail2ban
 		;;
 	docker)
+		remove_packages
+		install_docker_ce
+		;;
+	all)
+		# fail2ban
+		start_firewalld
+		add_port "22" "tcp"
+		install_fail2ban
+		config_fial2ban
+		add_sshd
+		start_fail2ban
+		# docker-ce
 		remove_packages
 		install_docker_ce
 		;;
