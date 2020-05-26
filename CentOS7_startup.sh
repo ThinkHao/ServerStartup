@@ -34,6 +34,7 @@ install_docker_ce() {
 	echo "Start && Enable docker-ce"
 	systemctl start docker
 	systemctl enable docker
+	accelerate_docker
 	echo "Testing docker..."
 	which "docker" > /dev/null
 	if [ $? -eq 0 ];then
@@ -72,6 +73,18 @@ accelerate_yum() {
 	if [ $? -eq 0 ];then
 		echo "YUM Speed is OK."
 	fi
+}
+
+accelerate_docker() {
+	echo "
+{
+    "registry-mirrors": [
+        "https://registry.docker-cn.com"
+    ]
+}
+	" > /etc/docker/daemon.json
+	systemctl daemon-reload
+	systemctl restart docker
 }
 
 install_fail2ban() {
@@ -136,6 +149,7 @@ case "${action}" in
 		accelerate_yum
 		remove_packages
 		install_docker_ce
+		accelerate_docker
 		;;
 	all)
 		# fail2ban
