@@ -77,8 +77,7 @@ accelerate_yum() {
 }
 
 accelerate_docker() {
-	echo '#开启Docker镜像加速
-{
+	echo '{
     "registry-mirrors": [
         "https://registry.docker-cn.com"
     ]
@@ -95,7 +94,7 @@ install_fail2ban() {
 		echo "Added epel-release！"
 	fi
 	echo "Start to install fail2ban..."
-	yum -y install fail2ban &> /dev/null
+	yum -y install fail2ban
 	if [ $? -eq 0 ];then
 		echo "Success to install fail2ban!"
 	fi
