@@ -30,7 +30,7 @@ install_docker_ce() {
 	echo "Importing repo:"
 	yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo &> /dev/null
 	echo "Installing docker-ce:"
-	yum -y install docker-ce &> /dev/null
+	yum -y install docker-ce
 	echo "Start && Enable docker-ce"
 	systemctl start docker
 	systemctl enable docker
