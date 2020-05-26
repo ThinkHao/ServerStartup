@@ -69,6 +69,7 @@ add_port() {
 }
 
 accelerate_yum() {
+	yum clean all &> /dev/null
 	yum makecache fast &> /dev/null
 	if [ $? -eq 0 ];then
 		echo "YUM Speed is OK."
@@ -76,13 +77,13 @@ accelerate_yum() {
 }
 
 accelerate_docker() {
-	echo "
+	echo '#开启Docker镜像加速
 {
     "registry-mirrors": [
         "https://registry.docker-cn.com"
     ]
 }
-	" > /etc/docker/daemon.json
+' > /etc/docker/daemon.json
 	systemctl daemon-reload
 	systemctl restart docker
 }
