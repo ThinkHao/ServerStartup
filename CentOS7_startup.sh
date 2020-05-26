@@ -34,7 +34,7 @@ install_docker_ce() {
 	echo "Start && Enable docker-ce"
 	systemctl start docker
 	systemctl enable docker
-	accelerate_docker
+	accelerate_docker $2
 	echo "Testing docker..."
 	which "docker" > /dev/null
 	if [ $? -eq 0 ];then
@@ -77,9 +77,15 @@ accelerate_yum() {
 }
 
 accelerate_docker() {
-	curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://f1361db2.m.daocloud.io
+	cat > /etc/docker/daemon.json << EOF
+{
+  "registry-mirrors": ["https://$2.mirror.aliyuncs.com"]
+}
+EOF
+	systemctl daemon-reload
+	systemctl restart docker
 	if [ $? -eq 0 ];then
-		systemctl restart docker
+		echo "Docker Speed is OK"
 	fi
 }
 
@@ -130,7 +136,9 @@ start_fail2ban() {
 
 # Begin to install fail2ban
 action=$1
+secret=$2
 [ -z $1 ] && action=all
+[ -z $2 ] && secret=xxxxxxxx
 case "${action}" in
     fail2ban)
 		start_firewalld
@@ -145,7 +153,6 @@ case "${action}" in
 		accelerate_yum
 		remove_packages
 		install_docker_ce
-		accelerate_docker
 		;;
 	all)
 		# fail2ban
