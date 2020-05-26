@@ -5,8 +5,17 @@ set -e
 
 # Check if user is root
 if [ $(id -u) != "0" ]; then
-    echo "Error: You must be root to run this script！"
-    exit 1
+	echo "Error: You must be root to run this script！"
+	exit 1
+fi
+
+# Check the number of args
+if [ $# -gt 2 ]; then
+	echo "This script takes two args."
+	echo "The first arg is install option;"
+	echo "The second arg is docker accelerate key. You can get it for free by visiting "
+	echo "website https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors ."
+	exit 1
 fi
 
 remove_packages() {
@@ -14,7 +23,7 @@ remove_packages() {
 	do
 	echo "Removing ${line}"
 	yum -y remove $line &> /dev/null
-	if [ $? -eq 0 ];then
+	if [ $? -eq 0 ]; then
 		echo "Removed ${line}"
 	else
 		echo "Failed to remove ${line}"
@@ -37,7 +46,7 @@ install_docker_ce() {
 	accelerate_docker $2
 	echo "Testing docker..."
 	which "docker" > /dev/null
-	if [ $? -eq 0 ];then
+	if [ $? -eq 0 ]; then
 		docker run hello-world
 	else
 		echo "Command: docker not found!"
@@ -47,7 +56,7 @@ install_docker_ce() {
 
 start_firewalld() {
 	systemctl start firewalld &> /dev/null
-	if [ $? -eq 0 ];then
+	if [ $? -eq 0 ]; then
 		systemctl enable firewalld &> /dev/null
 		echo "Success to start firewalld!"
 	else
@@ -63,7 +72,7 @@ add_port() {
 	echo "Adding port $1/$2..."
 	firewall-cmd --zone=public --add-port=$2/$1 --permanent &> /dev/null
 	firewall-cmd --reload &> /dev/null
-	if [ $? -eq 0 ];then
+	if [ $? -eq 0 ]; then
 		echo "Success to restart firewalld. Port $1/$2 has been opened."
 	fi
 }
@@ -71,7 +80,7 @@ add_port() {
 accelerate_yum() {
 	yum clean all &> /dev/null
 	yum makecache fast &> /dev/null
-	if [ $? -eq 0 ];then
+	if [ $? -eq 0 ]; then
 		echo "YUM Speed is OK."
 	fi
 }
@@ -84,7 +93,7 @@ accelerate_docker() {
 EOF
 	systemctl daemon-reload
 	systemctl restart docker
-	if [ $? -eq 0 ];then
+	if [ $? -eq 0 ]; then
 		echo "Docker Speed is OK"
 	fi
 }
@@ -92,12 +101,12 @@ EOF
 install_fail2ban() {
 	echo "Adding the epel-release repo..."
 	yum -y install epel-release &> /dev/null
-	if [ $? -eq 0 ];then
+	if [ $? -eq 0 ]; then
 		echo "Added epel-release！"
 	fi
 	echo "Start to install fail2ban..."
 	yum -y install fail2ban
-	if [ $? -eq 0 ];then
+	if [ $? -eq 0 ]; then
 		echo "Success to install fail2ban!"
 	fi
 }
