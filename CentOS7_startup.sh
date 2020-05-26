@@ -67,6 +67,13 @@ add_port() {
 	fi
 }
 
+accelerate_yum() {
+	yum makecache fast &> /dev/null
+	if [ $? -eq 0 ];then
+		echo "YUM Speed is OK."
+	fi
+}
+
 install_fail2ban() {
 	echo "Adding the epel-release repo..."
 	yum -y install epel-release &> /dev/null
@@ -120,19 +127,22 @@ case "${action}" in
     fail2ban)
 		start_firewalld
 		add_port "tcp" "22"
+		accelerate_yum
 		install_fail2ban
 		config_fial2ban
 		add_sshd
 		start_fail2ban
 		;;
 	docker)
+		accelerate_yum
 		remove_packages
 		install_docker_ce
 		;;
 	all)
 		# fail2ban
 		start_firewalld
-		add_port "22" "tcp"
+		add_port "tcp" "22"
+		accelerate_yum
 		install_fail2ban
 		config_fial2ban
 		add_sshd
