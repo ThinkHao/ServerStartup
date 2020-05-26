@@ -77,14 +77,10 @@ accelerate_yum() {
 }
 
 accelerate_docker() {
-	echo '{
-    "registry-mirrors": [
-        "https://registry.docker-cn.com"
-    ]
-}
-' > /etc/docker/daemon.json
-	systemctl daemon-reload
-	systemctl restart docker
+	curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://f1361db2.m.daocloud.io
+	if [ $? -eq 0 ];then
+		systemctl restart docker
+	fi
 }
 
 install_fail2ban() {
