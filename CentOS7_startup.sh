@@ -115,9 +115,8 @@ start_fail2ban() {
 	echo "Starting fail2ban..."
 	systemctl start fail2ban &> /dev/null
 	if [ $? -eq 0 ];then
-		echo "Success to start fail2ban. The running state is:"
+		echo "Success to start fail2ban. The running state is: Running."
 	fi
-	fail2ban-client status sshd
 }
 
 # Begin to install fail2ban
