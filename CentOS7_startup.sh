@@ -43,7 +43,7 @@ install_docker_ce() {
 	echo "Start && Enable docker-ce"
 	systemctl start docker
 	systemctl enable docker
-	accelerate_docker $2
+	accelerate_docker $secret
 	echo "Testing docker..."
 	which "docker" > /dev/null
 	if [ $? -eq 0 ]; then
@@ -88,7 +88,7 @@ accelerate_yum() {
 accelerate_docker() {
 	cat > /etc/docker/daemon.json << EOF
 {
-  "registry-mirrors": ["https://$2.mirror.aliyuncs.com"]
+  "registry-mirrors": ["https://$1.mirror.aliyuncs.com"]
 }
 EOF
 	systemctl daemon-reload
