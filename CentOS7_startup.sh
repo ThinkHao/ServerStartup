@@ -44,8 +44,8 @@ install_docker_ce() {
 	clear
 	yum -y install docker-ce
 	echo -n "Start && Enable docker-ce..."
-	systemctl start docker
-	systemctl enable docker
+	systemctl start docker &> /dev/null
+	systemctl enable docker &> /dev/null
 	echo "Done"
 	echo -n "Accelerating docker speed..."
 	accelerate_docker $secret
