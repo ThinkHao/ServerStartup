@@ -41,6 +41,7 @@ install_docker_ce() {
 	yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo &> /dev/null
 	echo "Done"
 	echo "Installing docker-ce..."
+	clear
 	yum -y install docker-ce
 	echo -n "Start && Enable docker-ce..."
 	systemctl start docker
@@ -113,11 +114,9 @@ install_fail2ban() {
 	if [ $? -eq 0 ]; then
 		echo "Done"
 	fi
-	echo -n "Start to install fail2ban..."
+	echo "Start to install fail2ban..."
+	clear
 	yum -y install fail2ban
-	if [ $? -eq 0 ]; then
-		echo "Done"
-	fi
 }
 
 config_fial2ban() {
