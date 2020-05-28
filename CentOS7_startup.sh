@@ -146,6 +146,7 @@ logpath = /var/log/secure" > /etc/fail2ban/jail.d/sshd.local
 start_fail2ban() {
 	echo -n "Starting fail2ban..."
 	systemctl start fail2ban &> /dev/null
+	systemctl enable fail2ban &> /dev/null
 	if [ $? -eq 0 ];then
 		echo "Done"
 	fi
