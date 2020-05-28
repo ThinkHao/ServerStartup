@@ -34,20 +34,30 @@ remove_packages() {
 }
 
 install_docker_ce() {
-	echo "Installing dependence:"
+	echo -n "Installing dependence..."
 	yum -y install yum-utils device-mapper-persistent-date lvm2 &> /dev/null
-	echo "Importing repo:"
+	echo "Done"
+	echo -n "Importing repo..."
 	yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo &> /dev/null
-	echo "Installing docker-ce:"
+	echo "Done"
+	echo "Installing docker-ce..."
 	yum -y install docker-ce
-	echo "Start && Enable docker-ce"
+	echo -n "Start && Enable docker-ce..."
 	systemctl start docker
 	systemctl enable docker
+	echo "Done"
+	echo -n "Accelerating docker speed..."
 	accelerate_docker $secret
-	echo "Testing docker..."
+	echo "Done"
+	echo -n "Testing docker..."
 	which "docker" > /dev/null
 	if [ $? -eq 0 ]; then
-		docker run hello-world
+		docker run hello-world &> /dev/null
+		if [ $? -eq 0 ]; then
+			echo "OK"
+		else
+			echo "Fail"
+		fi
 	else
 		echo "Command: docker not found!"
 		install_docker_ce
@@ -55,12 +65,13 @@ install_docker_ce() {
 }
 
 start_firewalld() {
+	echo -n "Starting Firewall..."
 	systemctl start firewalld &> /dev/null
 	if [ $? -eq 0 ]; then
 		systemctl enable firewalld &> /dev/null
-		echo "Success to start firewalld!"
+		echo "Done"
 	else
-		echo "Fail to start firewalld."
+		echo "Fail"
 		exit 1
 	fi
 }
@@ -69,19 +80,20 @@ start_firewalld() {
 # $1: port_number
 # $2: protocol
 add_port() {
-	echo "Adding port $1/$2..."
+	echo -n "Adding port $1/$2..."
 	firewall-cmd --zone=public --add-port=$2/$1 --permanent &> /dev/null
 	firewall-cmd --reload &> /dev/null
 	if [ $? -eq 0 ]; then
-		echo "Success to restart firewalld. Port $1/$2 has been opened."
+		echo "Done"
 	fi
 }
 
 accelerate_yum() {
+	echo -n "Accelerating Yum ..."
 	yum clean all &> /dev/null
 	yum makecache fast &> /dev/null
 	if [ $? -eq 0 ]; then
-		echo "YUM Speed is OK."
+		echo "Done"
 	fi
 }
 
@@ -93,26 +105,23 @@ accelerate_docker() {
 EOF
 	systemctl daemon-reload
 	systemctl restart docker
-	if [ $? -eq 0 ]; then
-		echo "Docker Speed is OK"
-	fi
 }
 
 install_fail2ban() {
-	echo "Adding the epel-release repo..."
+	echo -n "Adding the epel-release repo..."
 	yum -y install epel-release &> /dev/null
 	if [ $? -eq 0 ]; then
-		echo "Added epel-release！"
+		echo "Done"
 	fi
-	echo "Start to install fail2ban..."
+	echo -n "Start to install fail2ban..."
 	yum -y install fail2ban
 	if [ $? -eq 0 ]; then
-		echo "Success to install fail2ban!"
+		echo "Done"
 	fi
 }
 
 config_fial2ban() {
-	echo "Make some configurations for fail2ban."
+	echo -n "Make some configurations for fail2ban..."
 	echo "#默认配置
 [DEFAULT]
 ignoreip = 127.0.0.1 127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
@@ -121,11 +130,11 @@ findtime = 600
 maxretry = 5
 banaction = firewallcmd-ipset
 action = %(action_mwl)s" > /etc/fail2ban/jail.local
-	echo "Done!"
+	echo "Done"
 }
 
 add_sshd() {
-	echo "Adding sshd into fail2ban..."
+	echo -n "Adding sshd into fail2ban..."
 	echo "
 [sshd]
 enabled = true
@@ -136,10 +145,10 @@ logpath = /var/log/secure" > /etc/fail2ban/jail.d/sshd.local
 }
 
 start_fail2ban() {
-	echo "Starting fail2ban..."
+	echo -n "Starting fail2ban..."
 	systemctl start fail2ban &> /dev/null
 	if [ $? -eq 0 ];then
-		echo "Success to start fail2ban. The running state is: Running."
+		echo "Done"
 	fi
 }
 
@@ -177,7 +186,7 @@ case "${action}" in
 		install_docker_ce
 		;;
 	*)
-		echo "Usage: $(basename $0) install | $(basename $0)"
+		echo "Usage: $(basename $0) docker|fail2ban|all"
 		;;
 esac
 
