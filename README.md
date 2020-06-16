@@ -8,11 +8,18 @@ chmod +x ./CentOS7_startup.sh
 ```
 如果要安装fail2ban：
 ```shell
-./CentOS7_startup.sh
+./CentOS7_startup.sh fail2ban
 ```
 如果要安装docker-ce：
 ```shell
 ./CentOS7_startup.sh docker
+# 有阿里云的docker加速码，可以作为第二个参数传递
+# 加速码的申请地址
+./CentOS7_startup.sh docker xxxxxxxx
+```
+如果需要同时安装fail2ban和docker-ce：
+```
+./CentOS7_startup.sh all
 ```
 
 ## 后续
